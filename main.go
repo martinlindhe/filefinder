@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -12,6 +13,7 @@ import (
 var (
 	inDir   = kingpin.Arg("inDir", "Input directory.").String()
 	minSize = kingpin.Flag("min-size", "Minimum size in bytes.").Int64()
+	maxSize = kingpin.Flag("max-size", "Maximum size in bytes.").Int64()
 )
 
 func init() {
@@ -31,6 +33,7 @@ func main() {
 	}
 
 	finder.minSize = *minSize
+	finder.maxSize = *maxSize
 	finder.SearchAndPrint()
 }
 
@@ -38,6 +41,7 @@ func main() {
 type FileFinder struct {
 	rootDir   string
 	minSize   int64
+	maxSize   int64
 	totalSize int64 // accumulates while finding matches
 	totalHits int64
 }
@@ -59,8 +63,7 @@ func NewFileFinder(inDir string) (*FileFinder, error) {
 
 // SearchAndPrint performs search, printing matches to current pattern
 func (find *FileFinder) SearchAndPrint() {
-
-	log.Println("Searching in", find.rootDir)
+	log.Println("Searching in", find.rootDir, find.renderCriterias())
 
 	filepath.Walk(find.rootDir, func(fp string, fi os.FileInfo, err error) error {
 		if err != nil {
@@ -77,7 +80,13 @@ func (find *FileFinder) SearchAndPrint() {
 		}
 		if find.minSize != 0 {
 			if fi.Size() < find.minSize {
-				// log.Println("DEBUG: file too small so hiding", fi.Name())
+				// log.Println("DEBUG: skipping, file too small:", fi.Name(), prettyDataSize(fi.Size()))
+				matched = false
+			}
+		}
+		if find.maxSize != 0 {
+			if fi.Size() > find.maxSize {
+				// log.Println("DEBUG: skipping, file too big:", fi.Name(), prettyDataSize(fi.Size()))
 				matched = false
 			}
 		}
@@ -95,17 +104,28 @@ func (find *FileFinder) SearchAndPrint() {
 // present data size in proper scale, like "512KiB" or "700GiB"
 func prettyDataSize(val int64) string {
 	if val < 1024 {
-		return fmt.Sprintf("%d", val) + "b"
+		return fmt.Sprintf("%d", val) + " bytes"
 	}
 	v := float64(val)
 	if v < 1024*1024 {
-		return fmt.Sprintf("%.1f", v/1024) + "KiB"
+		return fmt.Sprintf("%.1f", v/1024) + " KiB"
 	}
 	if v < 1024*1024*1024 {
-		return fmt.Sprintf("%.1f", v/(1024*1024)) + "MiB"
+		return fmt.Sprintf("%.1f", v/(1024*1024)) + " MiB"
 	}
 	if v < 1024*1024*1024*1024 {
-		return fmt.Sprintf("%.1f", v/(1024*1024*1024)) + "GiB"
+		return fmt.Sprintf("%.1f", v/(1024*1024*1024)) + " GiB"
 	}
-	return fmt.Sprintf("%.1f", v/(1024*1024*1024*1024)) + "TiB"
+	return fmt.Sprintf("%.1f", v/(1024*1024*1024*1024)) + " TiB"
+}
+
+func (find *FileFinder) renderCriterias() string {
+	res := []string{}
+	if find.minSize != 0 {
+		res = append(res, "at least "+prettyDataSize(find.minSize))
+	}
+	if find.maxSize != 0 {
+		res = append(res, "at max "+prettyDataSize(find.maxSize))
+	}
+	return strings.Join(res, ", ")
 }
