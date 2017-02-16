@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-
-	"gopkg.in/alecthomas/kingpin.v2"
-
 	"log"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -27,14 +26,15 @@ func main() {
 	}
 
 	finder, err := NewFileFinder(*inDir)
-	finder.minSize = *minSize
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	finder.minSize = *minSize
 	finder.SearchAndPrint()
 }
 
+// FileFinder ...
 type FileFinder struct {
 	rootDir   string
 	minSize   int64
@@ -42,22 +42,22 @@ type FileFinder struct {
 	totalHits int64
 }
 
+// NewFileFinder returns a new FileFinder
 func NewFileFinder(inDir string) (*FileFinder, error) {
 	if _, err := os.Stat(inDir); err != nil && os.IsNotExist(err) {
 		return nil, err
 	}
-
 	rootDir, err := filepath.Abs(inDir)
 	if err != nil {
 		return nil, err
 	}
-
 	find := FileFinder{
 		rootDir: rootDir,
 	}
 	return &find, nil
 }
 
+// SearchAndPrint performs search, printing matches to current pattern
 func (find *FileFinder) SearchAndPrint() {
 
 	log.Println("Searching in", find.rootDir)
@@ -75,15 +75,12 @@ func (find *FileFinder) SearchAndPrint() {
 			log.Println(err) // malformed pattern
 			return err       // this is fatal.
 		}
-
-		// check additional criteria
 		if find.minSize != 0 {
 			if fi.Size() < find.minSize {
 				// log.Println("DEBUG: file too small so hiding", fi.Name())
 				matched = false
 			}
 		}
-
 		if matched {
 			fmt.Println(fp, prettyDataSize(fi.Size()))
 			find.totalSize += fi.Size()
@@ -111,14 +108,4 @@ func prettyDataSize(val int64) string {
 		return fmt.Sprintf("%.1f", v/(1024*1024*1024)) + "GiB"
 	}
 	return fmt.Sprintf("%.1f", v/(1024*1024*1024*1024)) + "TiB"
-}
-
-// exists reports whether the named file or directory exists.
-func exists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-	}
-	return true
 }
