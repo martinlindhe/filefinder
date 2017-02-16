@@ -77,16 +77,34 @@ func (find *FileFinder) SearchAndPrint() {
 		// check additional criteria
 		if find.minSize != 0 {
 			if fi.Size() < find.minSize {
-				log.Println("DEBUG: file too small so hiding", fi.Name())
+				// log.Println("DEBUG: file too small so hiding", fi.Name())
 				matched = false
 			}
 		}
 
 		if matched {
-			fmt.Println(fp)
+			fmt.Println(fp, prettyDataSize(fi.Size()))
 		}
 		return nil
 	})
+}
+
+// present data size in proper scale, like "512KiB" or "700GiB"
+func prettyDataSize(val int64) string {
+	if val < 1024 {
+		return fmt.Sprintf("%d", val) + "b"
+	}
+	v := float64(val)
+	if v < 1024*1024 {
+		return fmt.Sprintf("%.1f", v/1024) + "KiB"
+	}
+	if v < 1024*1024*1024 {
+		return fmt.Sprintf("%.1f", v/(1024*1024)) + "MiB"
+	}
+	if v < 1024*1024*1024*1024 {
+		return fmt.Sprintf("%.1f", v/(1024*1024*1024)) + "GiB"
+	}
+	return fmt.Sprintf("%.1f", v/(1024*1024*1024*1024)) + "TiB"
 }
 
 // exists reports whether the named file or directory exists.
