@@ -36,8 +36,10 @@ func main() {
 }
 
 type FileFinder struct {
-	rootDir string
-	minSize int64
+	rootDir   string
+	minSize   int64
+	totalSize int64 // accumulates while finding matches
+	totalHits int64
 }
 
 func NewFileFinder(inDir string) (*FileFinder, error) {
@@ -84,9 +86,13 @@ func (find *FileFinder) SearchAndPrint() {
 
 		if matched {
 			fmt.Println(fp, prettyDataSize(fi.Size()))
+			find.totalSize += fi.Size()
+			find.totalHits++
 		}
 		return nil
 	})
+
+	fmt.Println("Found", find.totalHits, "files in", prettyDataSize(find.totalSize))
 }
 
 // present data size in proper scale, like "512KiB" or "700GiB"
