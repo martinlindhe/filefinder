@@ -11,9 +11,10 @@ import (
 )
 
 var (
-	inDir   = kingpin.Arg("inDir", "Input directory.").String()
-	minSize = kingpin.Flag("min-size", "Minimum size in bytes.").Int64()
-	maxSize = kingpin.Flag("max-size", "Maximum size in bytes.").Int64()
+	inDir    = kingpin.Arg("inDir", "Input directory.").String()
+	minSize  = kingpin.Flag("min-size", "Minimum size in bytes.").Int64()
+	maxSize  = kingpin.Flag("max-size", "Maximum size in bytes.").Int64()
+	filename = kingpin.Flag("filename", "Filename wildcard match, eg: *.mp3").String()
 )
 
 func init() {
@@ -31,7 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	finder.filename = *filename
 	finder.minSize = *minSize
 	finder.maxSize = *maxSize
 	finder.SearchAndPrint()
@@ -40,6 +41,7 @@ func main() {
 // FileFinder ...
 type FileFinder struct {
 	rootDir   string
+	filename  string
 	minSize   int64
 	maxSize   int64
 	totalSize int64 // accumulates while finding matches
@@ -65,6 +67,10 @@ func NewFileFinder(inDir string) (*FileFinder, error) {
 func (find *FileFinder) SearchAndPrint() {
 	log.Println("Searching in", find.rootDir, find.renderCriterias())
 
+	if find.filename == "" {
+		find.filename = "*"
+	}
+
 	filepath.Walk(find.rootDir, func(fp string, fi os.FileInfo, err error) error {
 		if err != nil {
 			log.Println(err) // can't walk here,
@@ -73,7 +79,7 @@ func (find *FileFinder) SearchAndPrint() {
 		if fi.IsDir() {
 			return nil // not a file.  ignore.
 		}
-		matched, err := filepath.Match("*", fi.Name()) // XXX "*.mp3" to match only this extension
+		matched, err := filepath.Match(find.filename, fi.Name())
 		if err != nil {
 			log.Println(err) // malformed pattern
 			return err       // this is fatal.
