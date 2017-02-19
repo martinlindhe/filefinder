@@ -1,6 +1,15 @@
 # About
 
 Lists all files under input directory.
+
+
+## Installation
+
+    go get -u github.com/martinlindhe/filefinder
+
+
+## Usage
+
 Use flags to filter output:
 
 ```
@@ -9,6 +18,7 @@ Use flags to filter output:
 --filename="*.mp3"
 ```
 
-# License
+
+## License
 
 Under [MIT](LICENSE)
