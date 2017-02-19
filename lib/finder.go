@@ -71,13 +71,11 @@ func (find *FileFinder) SearchAndPrint() {
 		}
 		if find.minSize != 0 {
 			if fi.Size() < find.minSize {
-				// log.Println("DEBUG: skipping, file too small:", fi.Name(), prettyDataSize(fi.Size()))
 				matched = false
 			}
 		}
 		if find.maxSize != 0 {
 			if fi.Size() > find.maxSize {
-				// log.Println("DEBUG: skipping, file too big:", fi.Name(), prettyDataSize(fi.Size()))
 				matched = false
 			}
 		}
@@ -137,7 +135,6 @@ func parseDataSize(s string) int64 {
 		switch {
 		case c >= '0' && c <= '9':
 			num += string(c)
-
 		default:
 			scale += string(c)
 		}

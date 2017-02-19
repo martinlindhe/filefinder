@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	finder "github.com/martinlindhe/findfiles/lib"
+	finder "github.com/martinlindhe/filefinder/lib"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 )
