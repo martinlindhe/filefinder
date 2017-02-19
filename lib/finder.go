@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -42,13 +43,13 @@ func (find *FileFinder) Filename(s string) {
 }
 
 // MinSize sets the min size
-func (find *FileFinder) MinSize(n int64) {
-	find.minSize = n
+func (find *FileFinder) MinSize(s string) {
+	find.minSize = parseDataSize(s)
 }
 
 // MaxSize sets the max size
-func (find *FileFinder) MaxSize(n int64) {
-	find.maxSize = n
+func (find *FileFinder) MaxSize(s string) {
+	find.maxSize = parseDataSize(s)
 }
 
 // SearchAndPrint performs search, printing matches to current pattern
@@ -117,5 +118,51 @@ func (find *FileFinder) renderCriterias() string {
 	if find.maxSize != 0 {
 		res = append(res, "at max "+prettyDataSize(find.maxSize))
 	}
+	if find.filename != "*" {
+		res = append(res, "filename matching "+find.filename)
+	}
 	return strings.Join(res, ", ")
+}
+
+// parseDataSize converts human readable string into a int
+func parseDataSize(s string) int64 {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return 0
+	}
+	num := ""
+	scale := ""
+
+	for _, c := range s {
+		switch {
+		case c >= '0' && c <= '9':
+			num += string(c)
+
+		default:
+			scale += string(c)
+		}
+	}
+
+	scale = strings.ToLower(strings.TrimSpace(scale))
+
+	val, err := strconv.ParseInt(num, 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	switch scale {
+	case "":
+		return val
+	case "k", "kb", "kib":
+		return val * 1024
+	case "m", "mb", "mib":
+		return val * 1024 * 1024
+	case "g", "gb", "gib":
+		return val * 1024 * 1024 * 1024
+	case "t", "tb", "tib":
+		return val * 1024 * 1024 * 1024 * 1024
+	}
+
+	log.Fatal("Unknown scale", scale)
+	return val
 }

@@ -10,8 +10,8 @@ import (
 
 var (
 	inDir    = kingpin.Arg("inDir", "Input directory.").String()
-	minSize  = kingpin.Flag("min-size", "Minimum size in bytes.").Int64()
-	maxSize  = kingpin.Flag("max-size", "Maximum size in bytes.").Int64()
+	minSize  = kingpin.Flag("min-size", "Minimum size in bytes.").String()
+	maxSize  = kingpin.Flag("max-size", "Maximum size in bytes.").String()
 	filename = kingpin.Flag("filename", "Filename wildcard match, eg: *.mp3").String()
 )
 

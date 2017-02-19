@@ -7,8 +7,8 @@ import (
 )
 
 func TestPrettyDataSize(t *testing.T) {
-
 	data := map[int64]string{
+		0:             "0 bytes",
 		100:           "100 bytes",
 		1024:          "1.0 KiB",
 		16384:         "16.0 KiB",
@@ -19,8 +19,21 @@ func TestPrettyDataSize(t *testing.T) {
 		1099511627776: "1.0 TiB",
 		4398046511104: "4.0 TiB",
 	}
-
 	for n, expect := range data {
 		assert.Equal(t, expect, prettyDataSize(n))
+	}
+}
+
+func TestParseDataSize(t *testing.T) {
+	data := map[string]int64{
+		"":     0,
+		"100":  100,
+		"1K":   1024,
+		"1 MB": 1048576,
+		"4GiB": 4294967296,
+		"4TB":  4398046511104,
+	}
+	for s, expect := range data {
+		assert.Equal(t, expect, parseDataSize(s))
 	}
 }

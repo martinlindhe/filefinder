@@ -1,11 +1,14 @@
 # About
 
-lists all files in input directory
-give flags to filter output
-    --min-size = XXX
-    --max-size = XXX
+Lists all files under input directory.
+Use flags to filter output:
 
+```
+--min-size=100MB
+--max-size=2GB
+--filename="*.mp3"
+```
 
-# TODO
+# License
 
-parse input sizes like "50G" (GiB)  or "50GiB" or "50GB" as same
+Under [MIT](LICENSE)
