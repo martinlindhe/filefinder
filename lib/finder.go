@@ -13,6 +13,7 @@ import (
 type FileFinder struct {
 	rootDir   string
 	filename  string
+	dirname   string
 	minSize   int64
 	maxSize   int64
 	totalSize int64 // accumulates while finding matches
@@ -42,6 +43,14 @@ func (find *FileFinder) Filename(s string) {
 	find.filename = s
 }
 
+// Dirname sets the dirname to search for, using wildcards
+func (find *FileFinder) Dirname(s string) {
+	if s == "" {
+		s = "*"
+	}
+	find.dirname = s
+}
+
 // MinSize sets the min size
 func (find *FileFinder) MinSize(s string) {
 	find.minSize = parseDataSize(s)
@@ -61,10 +70,15 @@ func (find *FileFinder) SearchAndPrint() {
 			log.Println(err) // can't walk here,
 			return nil       // but continue walking elsewhere
 		}
-		if fi.IsDir() {
-			return nil // not a file.  ignore.
+		if fi.IsDir() && find.dirname == "" {
+			return nil // not a file, and we're not looking for dirnames
 		}
-		matched, err := filepath.Match(find.filename, fi.Name())
+		// cannot search for both
+		q := find.filename
+		if find.dirname != "" {
+			q = find.dirname
+		}
+		matched, err := filepath.Match(q, fi.Name())
 		if err != nil {
 			log.Println(err) // malformed pattern
 			return err       // this is fatal.
