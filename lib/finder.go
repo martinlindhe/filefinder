@@ -11,13 +11,14 @@ import (
 
 // FileFinder ...
 type FileFinder struct {
-	rootDir   string
-	filename  string
-	dirname   string
-	minSize   int64
-	maxSize   int64
-	totalSize int64 // accumulates while finding matches
-	totalHits int64
+	rootDir         string
+	filename        string
+	dirname         string
+	minSize         int64
+	maxSize         int64
+	totalFileSize   int64 // accumulates while finding matches
+	totalFilesFound int64
+	totalDirsFound  int64
 }
 
 // NewFileFinder returns a new FileFinder
@@ -91,14 +92,23 @@ func (find *FileFinder) SearchAndPrint() {
 			}
 		}
 		if matched {
-			fmt.Println(fp, prettyDataSize(fi.Size()))
-			find.totalSize += fi.Size()
-			find.totalHits++
+			if fi.IsDir() {
+				find.totalDirsFound++
+			} else {
+				fmt.Println(fp, prettyDataSize(fi.Size()))
+				find.totalFileSize += fi.Size()
+				find.totalFilesFound++
+			}
 		}
 		return nil
 	})
 
-	fmt.Println("Found", find.totalHits, "files in", prettyDataSize(find.totalSize))
+	if find.totalFilesFound > 0 {
+		fmt.Println("Found", find.totalFilesFound, "files in", prettyDataSize(find.totalFileSize))
+	}
+	if find.totalDirsFound > 0 {
+		fmt.Println("Found", find.totalDirsFound, "directories")
+	}
 }
 
 // present data size in proper scale, like "512KiB" or "700GiB"
