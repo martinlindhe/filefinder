@@ -7,6 +7,13 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
+)
+
+var (
+	info = color.New(color.FgYellow).SprintFunc()
+	warn = color.New(color.FgRed).SprintFunc()
 )
 
 // FileFinder ...
@@ -61,12 +68,12 @@ func (find *FileFinder) MaxSize(s string) {
 
 // SearchAndPrint performs search, printing matches to current pattern
 func (find *FileFinder) SearchAndPrint() {
-	log.Println("Searching in", find.rootDir, find.renderCriterias())
+	fmt.Println(info("Searching in ", find.rootDir, " for ", find.renderCriterias()))
 
 	filepath.Walk(find.rootDir, func(fp string, fi os.FileInfo, err error) error {
 		if err != nil {
-			log.Println(err) // can't walk here,
-			return nil       // but continue walking elsewhere
+			log.Println(warn(err)) // can't walk here,
+			return nil             // but continue walking elsewhere
 		}
 		if fi.IsDir() && find.dirname == "" {
 			return nil // not a file, and we're not looking for dirnames
@@ -104,10 +111,10 @@ func (find *FileFinder) SearchAndPrint() {
 	})
 
 	if find.totalFilesFound > 0 {
-		fmt.Println("Found", find.totalFilesFound, "files in", prettyDataSize(find.totalFileSize))
+		fmt.Println(info("Found ", find.totalFilesFound, " files in ", prettyDataSize(find.totalFileSize)))
 	}
 	if find.totalDirsFound > 0 {
-		fmt.Println("Found", find.totalDirsFound, "directories")
+		fmt.Println(info("Found ", find.totalDirsFound, " directories"))
 	}
 }
 
