@@ -45,9 +45,6 @@ func (find *FileFinder) Filename(s string) {
 
 // Dirname sets the dirname to search for, using wildcards
 func (find *FileFinder) Dirname(s string) {
-	if s == "" {
-		s = "*"
-	}
 	find.dirname = s
 }
 
