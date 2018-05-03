@@ -161,7 +161,7 @@ func parseDataSize(s string) int64 {
 
 	for _, c := range s {
 		switch {
-		case c >= '0' && c <= '9':
+		case c >= '0' && c <= '9' || c == '.':
 			num += string(c)
 		default:
 			scale += string(c)
@@ -170,24 +170,24 @@ func parseDataSize(s string) int64 {
 
 	scale = strings.ToLower(strings.TrimSpace(scale))
 
-	val, err := strconv.ParseInt(num, 10, 64)
+	val, err := strconv.ParseFloat(num, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	switch scale {
 	case "":
-		return val
+		return int64(val)
 	case "k", "kb", "kib":
-		return val * 1024
+		return int64(val * 1024)
 	case "m", "mb", "mib":
-		return val * 1024 * 1024
+		return int64(val * 1024 * 1024)
 	case "g", "gb", "gib":
-		return val * 1024 * 1024 * 1024
+		return int64(val * 1024 * 1024 * 1024)
 	case "t", "tb", "tib":
-		return val * 1024 * 1024 * 1024 * 1024
+		return int64(val * 1024 * 1024 * 1024 * 1024)
 	}
 
-	log.Fatal("Unknown scale", scale)
-	return val
+	log.Fatal("Unknown scale: " + scale)
+	return int64(val)
 }

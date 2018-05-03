@@ -26,12 +26,14 @@ func TestPrettyDataSize(t *testing.T) {
 
 func TestParseDataSize(t *testing.T) {
 	data := map[string]int64{
-		"":     0,
-		"100":  100,
-		"1K":   1024,
-		"1 MB": 1048576,
-		"4GiB": 4294967296,
-		"4TB":  4398046511104,
+		"":        0,
+		"100":     100,
+		"1K":      1024,
+		"1 k":     1024,
+		"1 MB":    1048576,
+		"2.8 MiB": 2936012,
+		"4GiB":    4294967296,
+		"4TB":     4398046511104,
 	}
 	for s, expect := range data {
 		assert.Equal(t, expect, parseDataSize(s))
